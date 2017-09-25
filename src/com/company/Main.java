@@ -1,18 +1,17 @@
 package com.company;
-
 import java.io.FileNotFoundException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Main {
-
     public static void main(String args[]) throws FileNotFoundException {
-        BlockingQueue sharedQueue = new LinkedBlockingQueue();
+        String filename = "book1.txt";
+        BlockingQueue<String> sharedQueue = new LinkedBlockingQueue<>();
 
-        Thread prodThread = new Thread(new Producer(sharedQueue));
-        Thread consThread = new Thread(new Consumer(sharedQueue));
+        Consumer consumer = new Consumer();
+        Producer producer = new Producer(consumer, filename);
 
-        prodThread.start();
-        consThread.start();
+        new Thread(producer).start();
+        new Thread(consumer).start();
     }
 }

@@ -1,29 +1,45 @@
 package com.company;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
-import java.util.concurrent.BlockingQueue;
+
+import java.io.*;
+//import java.util.concurrent.BlockingQueue;
 
 public class Producer implements Runnable {
-    String filename = "book1.txt";
-    File file = new File(filename);
-    Scanner scanner = new Scanner(file);
+    private String filename;
+    public Consumer consumer;
 
-    private final BlockingQueue sharedQueue;
-
-    public Producer(BlockingQueue sharedQueue) throws FileNotFoundException {
-        this.sharedQueue = sharedQueue;
+    public Producer(Consumer consumer, String filename) {
+        this.consumer = consumer;
+        this.filename = filename;
     }
 
     @Override
     public void run() {
-        while(scanner.hasNext()){
-            try {
-                sharedQueue.put(scanner.next());
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader(filename));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
+        try {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            line = br.readLine();
+            while (line != null) {
+                sb.append(line);
+                sb.append("\n");
+                line = br.readLine();
+                if (line != null) {
+                    try {
+                        consumer.addStringRow(line);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        consumer.setFileIsFinished();
     }
 }
 
